@@ -8,92 +8,45 @@ This project is built around a **User Management Service** and focuses on implem
 
 ---
 
-# 📌 Project Overview
+## 🚀 Project Overview
 
-This project demonstrates how to handle exceptions in a **structured and reusable way** in a Spring Boot application.
+**Exception-Aware User Service** is a **Spring Boot REST API** built to demonstrate **centralized exception handling** in a clean and production-friendly way.
 
-Instead of allowing the application to return default or unclear errors, this project ensures that every exception is handled properly and transformed into a **meaningful API response**.
+The project follows a layered architecture where:
+- the **Controller** handles incoming API requests,
+- the **Service** contains business logic and validations,
+- the **Repository** interacts with the database,
+- and the **Global Exception Handler** catches and converts exceptions into meaningful HTTP responses.
 
-# 📂 Project Structure
+This project focuses on:
 
-```text
-src/main/java/com/example/exceptionawareuserservice
-│
-├── controller
-│   └── UserController.java
-│
-├── service
-│   └── UserService.java
-│
-├── repository
-│   └── UserRepository.java
-│
-├── model / entity
-│   └── User.java
-│
-├── dto
-│   └── UserRequest.java / UserResponse.java
-│
-├── exception
-│   ├── UserNotFoundException.java
-│   ├── DuplicateUserException.java
-│   ├── InvalidUserDataException.java
-│   ├── GlobalExceptionHandler.java
-│   └── ErrorResponse.java
-│
-└── ExceptionAwareUserServiceApplication.java
-📘 Package Explanation
-controller
+- custom exception handling
+- global exception handling using `@RestControllerAdvice`
+- clean error response design
+- proper HTTP status mapping
+- service-layer exception propagation
+- backend best practices for maintainable APIs
 
-Handles incoming REST API requests.
+> 📘 📖 Detailed Documentation
 
-service
+For complete project explanation, exception handling flow, curl test cases, and interview-ready notes, refer to:
 
-Contains business logic and validations.
+➡️ [Open HELP.md](./HELP.md)
 
-repository
+---
 
-Handles persistence / data access logic.
+## 🧠 Architecture Flow
 
-model/entity
-
-Represents domain entity such as User.
-
-dto
-
-Used for request/response payload transfer.
-
-exception
-
-Contains:
-
-custom exceptions
-global exception handler
-structured error response model
-🔄 Project Flow
-Client sends request to the User API
-Request reaches the Controller
-Controller calls the Service layer
-Service executes business logic
-If request is valid → success response is returned
-If any error occurs:
-validation error
-resource not found
-duplicate user
-invalid request
-runtime exception
-The exception is intercepted by the Global Exception Handler
-A clean and standardized error response is returned
-🧠 High-Level Architecture Diagram
+```text id="l2vxpy"
                  ┌──────────────────────┐
                  │      Client / UI     │
-                 │  (Postman / Frontend)│
+                 │ (Postman / Frontend) │
                  └──────────┬───────────┘
-                            │ HTTP Request
+                            │
                             ▼
                  ┌──────────────────────┐
                  │    User Controller   │
-                 │  REST API Endpoints  │
+                 │   REST API Layer     │
                  └──────────┬───────────┘
                             │
                             ▼
@@ -102,142 +55,30 @@ A clean and standardized error response is returned
                  │ Business Logic Layer │
                  └──────────┬───────────┘
                             │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ▼              ▼              ▼
- ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
- │ Validation Error│ │ Custom Exception│ │ Runtime / System│
- │ (Bad Input)     │ │ (User Not Found,│ │ Exception       │
- │                 │ │ Duplicate User) │ │                 │
- └────────┬────────┘ └────────┬────────┘ └────────┬────────┘
-          │                   │                   │
-          └──────────────┬────┴────┬──────────────┘
-                         ▼         ▼
-               ┌──────────────────────────┐
-               │ Global Exception Handler │
-               │  @RestControllerAdvice   │
-               └──────────┬───────────────┘
-                          │
-                          ▼
-               ┌──────────────────────────┐
-               │ Standard Error Response  │
-               │ status, message, path,   │
-               │ timestamp, error details │
-               └──────────────────────────┘
-📊 Exception Handling Flow Diagram
-                    EXCEPTION HANDLING FLOW
+                            ▼
+                 ┌──────────────────────┐
+                 │   User Repository    │
+                 │   Database Access    │
+                 └──────────┬───────────┘
+                            │
+                            ▼
+                 ┌──────────────────────┐
+                 │     H2 Database      │
+                 └──────────────────────┘
 
- Request
-    │
-    ▼
- Controller  ───────────────► Valid Request ─────────► Service Logic ─────────► Success Response
-    │
-    │
-    └────────────► Invalid / Error Scenario
-                          │
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-        ▼                 ▼                 ▼
- Validation Error   Business Exception   Unexpected Exception
- (e.g. blank name)  (e.g. user not found) (e.g. null pointer)
-        │                 │                 │
-        └─────────────────┴─────────────────┘
-                          │
-                          ▼
-              Global Exception Handler
-             (@RestControllerAdvice)
-                          │
-                          ▼
-                Structured Error Response
-🧩 Exception Handling Concepts Covered in This Project
-1. Custom Exceptions
+     If any exception occurs at any layer
+                            │
+                            ▼
+                 ┌──────────────────────┐
+                 │ GlobalExceptionHandler│
+                 │ @RestControllerAdvice │
+                 └──────────┬───────────┘
+                            │
+                            ▼
+                 ┌──────────────────────┐
+                 │   ErrorResponse JSON │
+                 └──────────────────────┘
 
-Custom exceptions are created to represent business-specific problems.
-
-Examples:
-UserNotFoundException
-DuplicateUserException
-InvalidUserDataException
-Example:
-throw new UserNotFoundException("User not found with id: " + id);
-2. Global Exception Handling
-
-Instead of writing try-catch in every controller, exception handling is centralized using:
-
-@RestControllerAdvice
-public class GlobalExceptionHandler {
-}
-Benefits:
-clean code
-reusable handling
-centralized error logic
-better maintainability
-3. Validation Exception Handling
-
-Handles invalid request payloads using:
-
-@Valid
-
-and annotations like:
-
-@NotBlank
-@NotNull
-@Email
-@Size
-Examples:
-empty name
-invalid email
-null values
-invalid mobile number
-4. Resource Not Found Exception
-
-Used when requested data does not exist.
-
-Example:
-GET /users/101
-Response:
-{
-  "status": 404,
-  "message": "User not found with id: 101"
-}
-5. Bad Request Handling
-
-Used when request is invalid.
-
-Examples:
-malformed JSON
-wrong request format
-invalid parameter type
-missing required field
-6. Duplicate / Business Rule Exception
-
-Used when a business rule is violated.
-
-Examples:
-duplicate email
-duplicate username
-already existing user
-7. Runtime / Generic Exception Handling
-
-Fallback exception handling for unexpected errors.
-
-@ExceptionHandler(Exception.class)
-Why?
-
-To avoid exposing raw stack traces and internal implementation details.
-
-8. Standardized Error Response Model
-
-All API errors are returned in a common structure.
-
-Example:
-{
-  "timestamp": "2026-04-07T10:15:30",
-  "status": 404,
-  "error": "Not Found",
-  "message": "User not found with id: 5",
-  "path": "/users/5"
-}
 
 🎯 Exception Handling Interview Revision Notes (Java Developer - 4.5 Years)
 
