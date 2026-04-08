@@ -1,4 +1,4 @@
-package com.UserService.Controller;
+package com.UserService.controller;
 
 import com.UserService.model.User;
 import com.UserService.service.UserService;
